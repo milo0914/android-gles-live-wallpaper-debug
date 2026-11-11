@@ -1,0 +1,7 @@
+[
+  {"tool_name": "execute_shell_command", "arguments": {"command": "cd ${args.repo_dir} && timeout 500 ./gradlew :app:assembleDebug --offline > /tmp/skill_build.log 2>&1; echo \"assemble_exit=$?\"; grep -E '^e: |BUILD' /tmp/skill_build.log | head -6"}},
+  {"tool_name": "execute_shell_command", "arguments": {"command": "cd ${args.repo_dir} && timeout 500 ./gradlew :app:lintDebug --offline > /tmp/skill_lint.log 2>&1; echo \"lint_exit=$?\"; grep -oE '[0-9]+ errors?, [0-9]+ warnings?' app/build/reports/lint-results-debug.txt 2>/dev/null | head -1; grep -cE 'daemon disappeared|FAILURE' /tmp/skill_lint.log || echo 0"}},
+  {"tool_name": "execute_shell_command", "arguments": {"command": "find /root/.gradle -name aapt2 -type f 2>/dev/null | head -1 | while read A; do \"$A\" dump badging ${args.repo_dir}/app/build/outputs/apk/debug/app-debug.apk 2>/dev/null | grep -E 'package:|launchable' | head -2; done; true"}},
+  {"tool_name": "execute_shell_command", "arguments": {"command": "cd ${args.repo_dir}; for DEX in $(unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -o 'classes[0-9]*\\.dex'); do H=$(unzip -p app/build/outputs/apk/debug/app-debug.apk $DEX | strings | grep -c \"${args.dex_probe}\" || true); [ \"$H\" != \"0\" ] && echo \"probe '${args.dex_probe}' found in $DEX ($H hits)\"; done; echo dex_probe_scan_done"}},
+  {"tool_name": "execute_shell_command", "arguments": {"command": "ls -la ${args.repo_dir}/app/build/outputs/apk/debug/app-debug.apk && md5sum ${args.repo_dir}/app/build/outputs/apk/debug/app-debug.apk"}}
+]
